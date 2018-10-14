@@ -1,0 +1,72 @@
+---
+title: "Course Project"
+author: "Prerana Chakraborty"
+date: "14 October 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Background
+Using devices such as Jawbone Up, Nike FuelBand, and Fitbit it is now possible to collect a large amount of data about personal activity relatively inexpensively. These type of devices are part of the quantified self movement - a group of enthusiasts who take measurements about themselves regularly to improve their health, to find patterns in their behavior, or because they are tech geeks. One thing that people regularly do is quantify how much of a particular activity they do, but they rarely quantify how well they do it.In this project, the main goal is to use data from accelerometers on the belt, forearm, arm, and dumbell of 6 participants. They were asked to perform barbell lifts correctly and incorrectly in 5 different ways. More information is available from the website here: http://web.archive.org/web/20161224072740/http:/groupware.les.inf.puc-rio.br/har (see the section on the Weight Lifting Exercise Dataset).\  
+
+## Data Used
+The training data for this project are available here:
+
+https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv
+
+The test data are available here:
+
+https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv \  
+
+## Loading of Data
+```{r echo=TRUE}
+traindata<-read.csv("traindata.csv")
+testdata<-read.csv("testdata.csv")
+```
+
+## Cleaning of Data
+
+The entries where "classe" variable is not available are removed from the training and test data.
+```{r echo=TRUE,warning=FALSE,message=FALSE}
+library(dplyr)
+library(ggplot2)
+clean <- colSums(is.na(traindata))/nrow(traindata) < 0.95
+clntraindata <- traindata[,clean]
+clntraindata <- clntraindata[,-c(1:7)]
+clean2 <- colSums(is.na(testdata))/nrow(testdata) < 0.95
+clntestdata <- testdata[,clean]
+clntestdata <- clntestdata[,-c(1:7)]
+```
+## Data Splitting
+```{r echo=TRUE}
+library(caret)
+library(e1071)
+intrain<-createDataPartition(clntraindata$classe,p=0.7,list = FALSE)
+traind<-clntraindata[intrain,]
+testd<-clntraindata[-intrain,]
+```
+
+## ML Algorithm - SVM 
+SVM algorithm is applied on the train and test datasets and the accuracy is checked.\   
+```{r echo=TRUE} 
+
+model<-svm(classe~.,data=traind)
+p<-predict(model,newdata=testd) 
+confusionMatrix(p,testd$classe) 
+```
+
+## ML Algorithm - Random Forest
+Random forest is applied on the train and test datasets and the accuracy is checked.
+```{r echo=TRUE}
+library(randomForest)
+model2<-train(classe~.,method="rf",data=traind,ntree=128)
+p2<-predict(model2,newdata=testd)
+confusionMatrix(p2,testd$classe)
+```
+## Prediction
+```{r echo=TRUE}
+predict(model2,clntestdata)
+```
