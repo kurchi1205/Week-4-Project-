@@ -29,7 +29,7 @@ testdata<-read.csv("testdata.csv")
 
 ## Cleaning of Data
 
-The entries where "classe" variable is not available are removed from the training and test data.
+
 ```{r echo=TRUE,warning=FALSE,message=FALSE}
 library(dplyr)
 library(ggplot2)
